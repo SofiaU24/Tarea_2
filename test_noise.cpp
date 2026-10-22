@@ -1,0 +1,34 @@
+//prueba de ruido perlin y fractal
+#include <iostream>
+#include <algorithm>
+#include "NoiseGenerator.h"
+
+static void resumen(const char* nombre, const Grid<float>& g) {
+    float mn = 1e9f, mx = -1e9f; double suma = 0;      // mínimo, máximo y suma de todos los valores
+    for (float v : g.data()) { mn = std::min(mn, v); mx = std::max(mx, v); suma += v; }
+    std::cout << nombre << ": min=" << mn << " max=" << mx
+              << " media=" << suma / g.data().size() << "\n";   // la media debe ser ~0.5
+}
+
+static void dibujar(const Grid<float>& g) {
+    const char* tonos = " .:-=+*#%@";                  // de valor bajo (vacío) a alto (@)
+    for (int y = 0; y < g.height(); y += 2) {          // salta una fila: los caracteres son altos
+        for (int x = 0; x < g.width(); ++x)
+            std::cout << tonos[std::clamp(int(g.at(x, y) * 10.0f), 0, 9)];  // valor 0..1 -> carácter
+        std::cout << "\n";
+    }
+}
+
+int main() {
+    NoiseGenerator ng(117);                            // semilla 117, como en el lab
+    Grid<float> a = ng.perlin(64, 32, 0.08f);
+    resumen("perlin ", a);
+    dibujar(a);
+    NoiseGenerator ng2(117);                           // otra instancia con la MISMA semilla
+    std::cout << "misma semilla = mismo resultado: "
+              << (a.data() == ng2.perlin(64, 32, 0.08f).data() ? "SI" : "NO") << "\n";
+    NoiseGenerator ng3(117);
+    Grid<float> f = ng3.fractal(64, 32, 0.05f, 4, 0.5f, 2.0f);   // 4 octavas
+    resumen("fractal", f);
+    dibujar(f);
+}
