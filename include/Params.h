@@ -2,7 +2,6 @@
 #include <string>
 
 // Todos los valores que el menú (ImGui) puede modificar.
-// Agrega aquí los parámetros nuevos y expónlos en app/App.cpp (drawControls).
 
 struct TerrainParams {            // Perlin fractal (paisaje)
     float scale       = 0.05f;
