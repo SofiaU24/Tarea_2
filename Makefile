@@ -1,0 +1,34 @@
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -g -MMD -MP \
+           -Iinclude -I. -Iimgui -Iimgui/backends
+
+# Todos los .cpp de src/ y sus subcarpetas (src/*.cpp, src/pcg/*.cpp, ...) + ImGui
+SRCS = $(wildcard src/*.cpp) \
+       imgui/imgui.cpp imgui/imgui_draw.cpp imgui/imgui_tables.cpp imgui/imgui_widgets.cpp \
+       imgui/backends/imgui_impl_glfw.cpp imgui/backends/imgui_impl_opengl3.cpp
+OBJS = $(SRCS:.cpp=.o)
+DEPS = $(OBJS:.o=.d)
+
+ifeq ($(OS),Windows_NT)
+  TARGET = Tarea2.exe
+  LDLIBS = -lglfw3 -lglew32 -lopengl32 -lgdi32
+else
+  TARGET = Tarea2
+  LDLIBS = -lglfw -lGLEW -lGL
+endif
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDLIBS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(TARGET).exe
+
+# Recompila cuando cambia un .h (archivos .d generados por -MMD)
+-include $(DEPS)
+
+.PHONY: all clean
