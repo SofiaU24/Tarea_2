@@ -1,0 +1,8 @@
+*.o
+*.d
+*.exe
+build/
+Tarea2
+test_noise
+*Zone.Identifier
+imgui.ini
