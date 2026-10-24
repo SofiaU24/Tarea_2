@@ -1,7 +1,7 @@
 #include "TownGenerator.h"
 #include "NoiseGenerator.h" //usa perli para generar el terreno
-#include "Rng.h" //generador de casas y calles
-#include "Bsp.h"
+#include "Bsp.h" //generador de casas y calles
+#include "Rng.h" 
 #include "Raster.h" //drawLine
 #include "LSystem.h" //reglas arboles
 #include "Turtle.h" //dibujo arboles
