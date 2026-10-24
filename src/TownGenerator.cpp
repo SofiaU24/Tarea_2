@@ -1,8 +1,13 @@
 #include "TownGenerator.h"
 #include "NoiseGenerator.h" //usa perli para generar el terreno
-#include "Rng.h"
+#include "Rng.h" //generador de casas y calles
 #include "Bsp.h"
-#include "Raster.h"
+#include "Raster.h" //drawLine
+#include "LSystem.h" //reglas arboles
+#include "Turtle.h" //dibujo arboles
+
+#include <cmath>
+#include <vector>
 
 Level generateTown(const Params& params){
     Level level;
@@ -12,7 +17,7 @@ Level generateTown(const Params& params){
 
     NoiseGenerator noise(deriveSeed(params.seed, 1)); //cada etapa us una semilla distinta
 
-    //terreno perlin fractal
+    //PERLIN: TERRENO 
     level.heightMap = noise.fractal(params.width, params.height, params.terrain.scale, params.terrain.octaves, params.terrain.persistence, params.terrain.lacunarity);
 
     //recorre el mapa y asigna altura y tipo de tile segun esta altura
@@ -37,7 +42,7 @@ Level generateTown(const Params& params){
     Rng rng(deriveSeed(params.seed, 2));
     BspResult bsp = generateBsp(params.width, params.height, params.town.minLotSize, rng);
 
-    //Generar casas
+    //BSP: CASAS Y CALLLES
     int margen = params.town.houseMargin;
     int houseCount = 0;
 
@@ -76,6 +81,32 @@ Level generateTown(const Params& params){
 
 
     }
+
+    //LSYSTEM Y TURTLE: ARBOLES
+    LRules treeRules;
+    treeRules['F'] = params.trees.ruleF;
+    std::string treeText = evolveLSystem(params.trees.axiom, treeRules, params.trees.iterations);
+
+    Rng treeRng(deriveSeed(params.seed, 3));
+    int treeCount = 0;
+    level.treeBases.clear();
+
+    for(int y = 0; y < params.height; y++){
+        for(int x = 0; x < params.width; x++){
+            if(level.tiles.at(x, y) != Tile::Grass)continue; //generar arboles solo sobre pasto
+            if(!treeRng.chance(params.trees.density)) continue; //probabilidad
+
+            std::vector<LineSegment> segment = runTurtle(treeText, x, y, -90.0, params.trees.stepLength, params.trees.angleDeg, params.trees.angleJitterDeg, treeRng);
+
+            for(const LineSegment& s : segment){
+                //drawLine recibe entero, pero turtle trabaja con double. Se usa st::lround para redondear al entero mas cercano 
+                drawLine(level.tiles, (int)std::lround(s.x1), (int)std::lround(s.y1), (int)std::lround(s.x2), (int)std::lround(s.y2), Tile::Tree, Tile::Grass);
+                level.treeBases.push_back({x, y});
+                treeCount++;
+            }
+        }
+    }
+    level.metrics.trees = treeCount;
 
 
     //devuelve el nivel generado
