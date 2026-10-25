@@ -24,3 +24,4 @@ make -j
 ## Ventanas
 Las pestañas de "Pueblo" y "Cuevas" muestran cada escenario y sus metricas. En el menú de "Controles" a la derecha se puede cambiar la semilla y parámetros de cada técnica.
 
+Link itch.io: [https://itch.io/game/edit/5228937](https://socurv.itch.io/pueblo-y-cuevas-pcg)
